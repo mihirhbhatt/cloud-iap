@@ -114,83 +114,8 @@ flowchart LR
     class I,F,M sec;
 ```
 
-### AWS-only view
 
-```mermaid
-flowchart LR
-    A[GitHub Actions] --> B[Terraform AWS]
-    B --> C[VPC]
-    C --> D[Public Subnets]
-    C --> E[Private Subnets]
-    E --> F[EKS Cluster]
-    F --> G[Kubernetes Pods]
-    B --> H[IAM Roles]
-    B --> I[KMS + Secrets Manager]
-    B --> J[CloudTrail + CloudWatch]
-    G --> K[Monitoring + Logs]
-```
-
-### Azure / GCP pattern
-
-```mermaid
-flowchart LR
-    A[GitHub Actions] --> B[Terraform Azure / GCP]
-    B --> C[Network Foundation]
-    C --> D[Private Connectivity]
-    B --> E[Identity + Policy]
-    E --> F[Managed Services]
-    B --> G[Container / Workload Platform]
-    G --> H[Applications]
-    B --> I[Monitoring / Logging]
-```
-
-### Simplified happy path for stakeholders
-
-```mermaid
-flowchart LR
-    A[Business Need] --> B[Infrastructure Request]
-    B --> C[Reviewed and Approved]
-    C --> D[Terraform + Policy Checks]
-    D --> E[Secure Cloud Deployment]
-    E --> F[Running Application]
-    F --> G[Monitoring and Support]
-```
-
-### Security controls view
-
-```mermaid
-flowchart LR
-    A[GitHub Actions] --> B[OIDC Auth]
-    B --> C[Terraform Apply]
-    C --> D[Network Security]
-    C --> E[Identity + Access]
-    C --> F[Secrets + Encryption]
-    C --> G[Audit Logging]
-
-    D --> H[Private Subnets / Firewalls]
-    E --> I[IAM / Least Privilege]
-    F --> J[KMS / Secret Manager]
-    G --> K[CloudTrail / Logging]
-
-    classDef sec fill:#fde68a,stroke:#f59e0b,color:#111827;
-    class B,C,D,E,F,G,H,I,J,K sec;
-```
-
-### CI/CD and approval flow
-
-```mermaid
-flowchart LR
-    A[Developer Commit] --> B[Pull Request]
-    B --> C[Code Review]
-    C --> D[GitHub Actions Run]
-    D --> E[Terraform fmt / validate / plan]
-    E --> F[Security Scans]
-    F --> G[Approval Gate]
-    G --> H[Deploy to Environment]
-    H --> I[Monitoring and Alerts]
-```
-
-### One-page presentation layout
+### In NutShell
 
 ```mermaid
 flowchart TB
