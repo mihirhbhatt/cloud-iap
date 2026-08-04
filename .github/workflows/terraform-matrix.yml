@@ -1,0 +1,74 @@
+name: Terraform Multi-Cloud Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cloud: aws
+            dir: terraform/aws
+            role_arn: ${{ vars.AWS_ROLE_ARN }}
+            region: ${{ vars.AWS_REGION }}
+            auth: aws
+          - cloud: azure
+            dir: terraform/azure
+            auth: azure
+          - cloud: gcp
+            dir: terraform/gcp
+            auth: gcp
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials
+        if: matrix.auth == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ matrix.role_arn }}
+          aws-region: ${{ matrix.region }}
+          role-session-name: github-actions-${{ github.run_id }}-${{ matrix.cloud }}
+
+      - name: Azure login with OIDC
+        if: matrix.auth == 'azure'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Authenticate to Google Cloud
+        if: matrix.auth == 'gcp'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Terraform Format
+        run: terraform -chdir=${{ matrix.dir }} fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform -chdir=${{ matrix.dir }} init -upgrade
+
+      - name: Terraform Validate
+        run: terraform -chdir=${{ matrix.dir }} validate
+
+      - name: Terraform Plan
+        run: terraform -chdir=${{ matrix.dir }} plan -no-color

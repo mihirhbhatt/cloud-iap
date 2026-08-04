@@ -72,6 +72,167 @@ terraform init -backend-config=../backends/aws-s3-dynamodb.hcl
 terraform plan -var-file=../environments/dev/terraform.tfvars
 ```
 
+## Multi-cloud CI pattern
+
+This repo supports a cloud-agnostic delivery model through provider-specific GitHub Actions workflows:
+
+- [.github/workflows/terraform-aws.yml](.github/workflows/terraform-aws.yml)
+- [.github/workflows/terraform-azure.yml](.github/workflows/terraform-azure.yml)
+- [.github/workflows/terraform-gcp.yml](.github/workflows/terraform-gcp.yml)
+- [.github/workflows/terraform-matrix.yml](.github/workflows/terraform-matrix.yml)
+
+See [docs/multi-cloud-pattern.md](docs/multi-cloud-pattern.md), [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md), and [docs/ADR-cloud-agnostic-design.md](docs/ADR-cloud-agnostic-design.md) for the generalized architecture, provider setup steps, and design rationale.
+
+## Architecture overview
+
+```mermaid
+flowchart LR
+    A[Developer or AI Prompt] --> B[GitHub Repo]
+    B --> C[Terraform Modules]
+    C --> D[Cloud Provider]
+    D --> E[VPC / Network]
+    D --> F[Identity + Security]
+    D --> G[Managed Kubernetes / Compute]
+    E --> H[Private Subnets / Firewall / NAT]
+    F --> I[IAM / KMS / Secrets / Policies]
+    G --> J[Kubernetes Workloads]
+    B --> K[GitHub Actions CI/CD]
+    K --> L[terraform fmt / validate / plan]
+    K --> M[tfsec / Checkov / Trivy]
+    L --> N[Deployment Gate]
+    M --> N
+    N --> D
+    D --> O[Monitoring / Logs / Alerts]
+    O --> P[Operations and Iteration]
+
+    classDef cloud fill:#dfe8ff,stroke:#3b82f6,color:#111827;
+    classDef app fill:#dcfce7,stroke:#16a34a,color:#111827;
+    classDef sec fill:#fef3c7,stroke:#d97706,color:#111827;
+
+    class A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P cloud;
+    class J app;
+    class I,F,M sec;
+```
+
+### AWS-only view
+
+```mermaid
+flowchart LR
+    A[GitHub Actions] --> B[Terraform AWS]
+    B --> C[VPC]
+    C --> D[Public Subnets]
+    C --> E[Private Subnets]
+    E --> F[EKS Cluster]
+    F --> G[Kubernetes Pods]
+    B --> H[IAM Roles]
+    B --> I[KMS + Secrets Manager]
+    B --> J[CloudTrail + CloudWatch]
+    G --> K[Monitoring + Logs]
+```
+
+### Azure / GCP pattern
+
+```mermaid
+flowchart LR
+    A[GitHub Actions] --> B[Terraform Azure / GCP]
+    B --> C[Network Foundation]
+    C --> D[Private Connectivity]
+    B --> E[Identity + Policy]
+    E --> F[Managed Services]
+    B --> G[Container / Workload Platform]
+    G --> H[Applications]
+    B --> I[Monitoring / Logging]
+```
+
+### Simplified happy path for stakeholders
+
+```mermaid
+flowchart LR
+    A[Business Need] --> B[Infrastructure Request]
+    B --> C[Reviewed and Approved]
+    C --> D[Terraform + Policy Checks]
+    D --> E[Secure Cloud Deployment]
+    E --> F[Running Application]
+    F --> G[Monitoring and Support]
+```
+
+### Security controls view
+
+```mermaid
+flowchart LR
+    A[GitHub Actions] --> B[OIDC Auth]
+    B --> C[Terraform Apply]
+    C --> D[Network Security]
+    C --> E[Identity + Access]
+    C --> F[Secrets + Encryption]
+    C --> G[Audit Logging]
+
+    D --> H[Private Subnets / Firewalls]
+    E --> I[IAM / Least Privilege]
+    F --> J[KMS / Secret Manager]
+    G --> K[CloudTrail / Logging]
+
+    classDef sec fill:#fde68a,stroke:#f59e0b,color:#111827;
+    class B,C,D,E,F,G,H,I,J,K sec;
+```
+
+### CI/CD and approval flow
+
+```mermaid
+flowchart LR
+    A[Developer Commit] --> B[Pull Request]
+    B --> C[Code Review]
+    C --> D[GitHub Actions Run]
+    D --> E[Terraform fmt / validate / plan]
+    E --> F[Security Scans]
+    F --> G[Approval Gate]
+    G --> H[Deploy to Environment]
+    H --> I[Monitoring and Alerts]
+```
+
+### One-page presentation layout
+
+```mermaid
+flowchart TB
+    subgraph P1[Business Goal]
+        A[Secure multi-cloud platform]
+    end
+
+    subgraph P2[Delivery Pipeline]
+        B[Developer Request]
+        C[GitHub Actions]
+        D[Terraform Modules]
+        E[Security Scans]
+        F[Approval Gate]
+    end
+
+    subgraph P3[Platform Foundation]
+        G[VPC / Networking]
+        H[Identity + Access]
+        I[Secrets + Encryption]
+        J[Kubernetes / Workloads]
+    end
+
+    subgraph P4[Operations]
+        K[Monitoring]
+        L[Logs and Alerts]
+        M[Continuous Improvement]
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+```
+
 ## Example infrastructure request
 
 "Deploy a secure AWS EKS environment with private networking, NAT, IAM least privilege, CloudTrail, KMS encryption, CloudWatch monitoring, and a GitHub Actions-based deployment pipeline."
