@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloud-iap
+  labels:
+    app.kubernetes.io/name: cloud-iap
+    app.kubernetes.io/part-of: platform
