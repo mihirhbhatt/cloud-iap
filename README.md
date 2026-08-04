@@ -2,86 +2,126 @@
 
 Infrastructure as Prompt for secure, repeatable multi-cloud platform delivery.
 
-This repository is designed to turn natural-language infrastructure requests into compliant, production-ready platform artifacts. It combines Terraform, Kubernetes, GitHub Actions, and policy-as-code guardrails into a single workflow for enterprise delivery.
+This repository is a production-oriented starter for teams who want to deploy cloud infrastructure using a consistent, reusable, and policy-aware workflow. It is designed to help other engineers adopt the code quickly without requiring deep tribal knowledge.
 
-## Mission
+## Why this repository exists
 
-Create infrastructure by prompt, not by manual drift.
+This project turns infrastructure requests into structured, auditable platform assets. It combines:
+- Terraform modules
+- Kubernetes deployment patterns
+- GitHub Actions automation
+- security and policy validation
+- clear documentation for team handoff
 
-The repository is structured to support:
-- Request capture from human or AI workflows
-- Infrastructure specification in code
-- Reusable Terraform modules
-- Secure cloud deployment patterns
-- Policy validation and security scanning
-- CI/CD automation end-to-end
+The goal is to make infrastructure easier to understand, reuse, and ship across teams.
 
-## End-to-End Workflow
+## Who this is for
 
-1. Define the workload and target cloud
-2. Convert the request into a concrete infrastructure spec
-3. Generate or update Terraform modules and configuration
-4. Validate formatting, syntax, and plan output
-5. Run policy and security checks
-6. Deploy via GitHub Actions or similar pipeline
-7. Monitor and iterate from observed drift, cost, and health data
+This repository is useful for:
+- platform engineers
+- cloud architects
+- DevOps engineers
+- security-conscious delivery teams
+- teams standardizing on enterprise cloud patterns
 
-## Repository Structure
+## Repository overview
 
-- [AGENT.md](AGENT.md) — AI agent operating rules
+- [AGENT.md](AGENT.md) — AI operational behavior and delivery expectations
 - [SPECS.md](SPECS.md) — desired platform and workload specification
 - [SKILLS.md](SKILLS.md) — enterprise engineering standards
-- [RULES.md](RULES.md) — compliance and security guardrails
-- [ARCHITECTURE.md](ARCHITECTURE.md) — design overview
+- [RULES.md](RULES.md) — guardrails for compliance and security
+- [ARCHITECTURE.md](ARCHITECTURE.md) — architecture summary
 - [terraform](terraform) — cloud Terraform code and modules
-- [kubernetes](kubernetes) — cluster and app deployment manifests
-- [pipelines](pipelines) — CI/CD pipeline definitions
-- [policies](policies) — policy-as-code and security scanning rules
-- [docs](docs) — design notes and operational guidance
-- [examples](examples) — sample implementations
-- [scripts](scripts) — automation helpers
+- [kubernetes](kubernetes) — deployment manifests and cluster patterns
+- [pipelines](pipelines) — CI/CD templates for automation
+- [policies](policies) — security scanning and policy configuration
+- [docs](docs) — onboarding, usage, and operational guidance
+- [examples](examples) — sample implementations or reference patterns
+- [scripts](scripts) — automation helpers and utilities
 
-## Example Prompt
+## Quick start
 
-"Provision a production-grade AWS EKS environment with VPC, private subnets, NAT, IAM roles, KMS encryption, CloudTrail, CloudWatch, and a secure CI/CD pipeline. Use Terraform modules, enforce least privilege, and validate with tfsec and Checkov."
+1. Read the docs in this order:
+   - [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
+   - [docs/USAGE.md](docs/USAGE.md)
+   - [docs/DEPLOYMENT_CHECKLIST.md](docs/DEPLOYMENT_CHECKLIST.md)
+   - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
+   - [docs/RELEASE_PROCESS.md](docs/RELEASE_PROCESS.md)
+2. Choose a cloud target under [terraform](terraform)
+3. Review variables and module structure
+4. Initialize and validate the infrastructure
+5. Apply the code in a dev or sandbox environment
+6. Use the CI pipeline or run the commands locally
+7. Copy [.env.example](.env.example) to a secure local env file and fill in your environment values
+8. For production-style usage, review the backend templates under [terraform/backends](terraform/backends) and the example environment files under [terraform/environments](terraform/environments)
 
-## Standard Delivery Model
+## Backend and environment examples
 
-### 1. Foundation
+The repository includes starter backend and environment layering patterns for multiple provider types:
+
+- AWS S3 + DynamoDB backend: [terraform/backends/aws-s3-dynamodb.hcl](terraform/backends/aws-s3-dynamodb.hcl)
+- Azure Storage backend: [terraform/backends/azure-storage.hcl](terraform/backends/azure-storage.hcl)
+- GCP Storage backend: [terraform/backends/gcp-storage.hcl](terraform/backends/gcp-storage.hcl)
+- Environment examples: [terraform/environments](terraform/environments)
+
+Example for AWS:
+
+```bash
+cd terraform/aws
+terraform init -backend-config=../backends/aws-s3-dynamodb.hcl
+terraform plan -var-file=../environments/dev/terraform.tfvars
+```
+
+## Example infrastructure request
+
+"Deploy a secure AWS EKS environment with private networking, NAT, IAM least privilege, CloudTrail, KMS encryption, CloudWatch monitoring, and a GitHub Actions-based deployment pipeline."
+
+## Standard architecture model
+
+### Foundation
 - VPC or equivalent network boundary
-- Private connectivity
-- Shared services and observability
-- Identity and access controls
+- public and private subnets
+- private connectivity and egress control
+- identity and access policies
 
-### 2. Workloads
-- Kubernetes cluster or managed platform
-- Ingress and service exposure strategy
-- Resource requests and limits
-- Liveness and readiness probes
+### Workloads
+- Kubernetes or managed container runtime
+- explicit resource requests and limits
+- health checks for readiness and liveness
+- versioned container images
 
-### 3. Security
-- Minimal IAM permissions
-- Encrypted data at rest and in transit
-- Secrets handled through secure secret stores
-- Audit logging enabled by default
+### Security
+- least privilege access
+- encrypted storage and secrets
+- audit logging
+- guardrails for production deployments
 
-### 4. Automation
+### Automation
 - Terraform plan and validation in CI
-- Policy checks before merge
-- Deployment via OIDC-based workflows
-- Artifact retention and traceability
+- tfsec and Checkov policy scanning
+- OIDC-based cloud auth
+- deployment gating on code quality checks
 
-## Quality Gates
+## Validation gates
 
-Every change should pass:
+Before a change is considered ready to ship:
 - terraform fmt
 - terraform validate
 - terraform plan
 - tfsec
 - Checkov
 - Trivy
-- repo policy review
+- security review
+
+## Handoff guidance for other users
+
+To make this repository easy for others to use:
+- keep documentation clear and short
+- explain assumptions and required cloud permissions
+- document variables, outputs, and examples
+- keep modules reusable instead of custom one-off code
+- require validation and policy checks before deployment
 
 ## Outcome
 
-This repository supports Infrastructure as Prompt by converting a prompt into an auditable, reusable, policy-compliant infrastructure platform delivered through automation.
+This repository is intended to be a trustworthy starting point for infrastructure delivery, so new users can understand the standards, deploy the platform with minimal friction, and extend it safely for their own environments.
