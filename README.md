@@ -81,7 +81,7 @@ This repo supports a cloud-agnostic delivery model through provider-specific Git
 - [.github/workflows/terraform-gcp.yml](.github/workflows/terraform-gcp.yml)
 - [.github/workflows/terraform-matrix.yml](.github/workflows/terraform-matrix.yml)
 
-See [docs/multi-cloud-pattern.md](docs/multi-cloud-pattern.md), [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md), and [docs/ADR-cloud-agnostic-design.md](docs/ADR-cloud-agnostic-design.md) for the generalized architecture, provider setup steps, and design rationale.
+See [docs/multi-cloud-pattern.md](docs/multi-cloud-pattern.md), [docs/CLOUD_SETUP.md](docs/CLOUD_SETUP.md), [docs/AWS_WORKING_SESSION.md](docs/AWS_WORKING_SESSION.md), and [docs/ADR-cloud-agnostic-design.md](docs/ADR-cloud-agnostic-design.md) for the generalized architecture, AWS-first working flow, and design rationale.
 
 ## Architecture overview
 
